@@ -47,7 +47,6 @@ func main(){
 		if err != nil{
 			log.Print("No hay respuesta de la OMS")
 		}else{
-			r, err = strconv.Atoi(r.Ok)
 			log.Printf("%s", r.Ok)
 		}
 	}
