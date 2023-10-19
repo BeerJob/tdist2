@@ -21,11 +21,9 @@ RUN protoc --go_out=./proto --go_opt=paths=import \
 
 # RUN go get github.com/streadway/amqp
 
-WORKDIR /app/OMS
-
 RUN go build -o bin .
 
-ENTRYPOINT [ "/app/OMS/bin"]
+ENTRYPOINT [ "/app/bin"]
 
 # Compiladores proto .pb y grpc.pb
 # protoc --go_out=. --go-grpc_out=. *.proto

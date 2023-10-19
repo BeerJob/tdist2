@@ -40,7 +40,7 @@ func main(){
 			log.Print("No se pudo conectar con la OMS")
 		}
 		defer conn.Close()
-		cliente := pb.NameNOde(conn)
+		cliente := pb.NameNode(conn)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		r, err := cliente.Recepcion_Info(ctx, &pb.Datos{Nombre: strings.SplitN(lines[virtualPoint]," ",2)[0],Apellido: strings.SplitN(lines[virtualPoint]," ",2)[1],Estado: status})
