@@ -5,7 +5,7 @@ import(
 	"os"
 	"strings"
 	"bufio"
-	//"strconv"
+	"strconv"
 	"math/rand"
 	"time"
 	"context"
@@ -40,14 +40,15 @@ func main(){
 			log.Print("No se pudo conectar con la OMS")
 		}
 		defer conn.Close()
-		cliente := pb.NameNode(conn)
+		cliente := pb.NewNameNodeClient(conn)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		r, err := cliente.Recepcion_Info(ctx, &pb.Datos{Nombre: strings.SplitN(lines[virtualPoint]," ",2)[0],Apellido: strings.SplitN(lines[virtualPoint]," ",2)[1],Estado: status})
 		if err != nil{
 			log.Print("No hay respuesta de la OMS")
 		}else{
-			r1, err = strconv.Atoi(r.Ok)
+			r, err = strconv.Atoi(r.Ok)
+			log.Printf("%s", r.Ok)
 		}
 	}
 }
