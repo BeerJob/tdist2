@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NameNodeClient interface {
 	Recepcion_Info(ctx context.Context, in *Datos, opts ...grpc.CallOption) (*Recepcion, error)
+	ConsultarNombres(ctx context.Context, in *Estado_Persona, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error)
 }
 
 type nameNodeClient struct {
@@ -42,11 +43,21 @@ func (c *nameNodeClient) Recepcion_Info(ctx context.Context, in *Datos, opts ...
 	return out, nil
 }
 
+func (c *nameNodeClient) ConsultarNombres(ctx context.Context, in *Estado_Persona, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error) {
+	out := new(Lista_Datos_DataNode)
+	err := c.cc.Invoke(ctx, "/grpc.NameNode/ConsultarNombres", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NameNodeServer is the server API for NameNode service.
 // All implementations must embed UnimplementedNameNodeServer
 // for forward compatibility
 type NameNodeServer interface {
 	Recepcion_Info(context.Context, *Datos) (*Recepcion, error)
+	ConsultarNombres(context.Context, *Estado_Persona) (*Lista_Datos_DataNode, error)
 	mustEmbedUnimplementedNameNodeServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedNameNodeServer struct {
 
 func (UnimplementedNameNodeServer) Recepcion_Info(context.Context, *Datos) (*Recepcion, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Recepcion_Info not implemented")
+}
+func (UnimplementedNameNodeServer) ConsultarNombres(context.Context, *Estado_Persona) (*Lista_Datos_DataNode, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsultarNombres not implemented")
 }
 func (UnimplementedNameNodeServer) mustEmbedUnimplementedNameNodeServer() {}
 
@@ -88,6 +102,24 @@ func _NameNode_Recepcion_Info_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NameNode_ConsultarNombres_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Estado_Persona)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NameNodeServer).ConsultarNombres(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.NameNode/ConsultarNombres",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NameNodeServer).ConsultarNombres(ctx, req.(*Estado_Persona))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NameNode_ServiceDesc is the grpc.ServiceDesc for NameNode service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -99,6 +131,10 @@ var NameNode_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Recepcion_Info",
 			Handler:    _NameNode_Recepcion_Info_Handler,
 		},
+		{
+			MethodName: "ConsultarNombres",
+			Handler:    _NameNode_ConsultarNombres_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "mess.proto",
@@ -108,9 +144,8 @@ var NameNode_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DataNodeClient interface {
-	Solicitud_Info_DataNode_1(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error)
-	Solicitud_Info_DataNode_2(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error)
-	RegistrarNombre(ctx context.Context, in *Datos, opts ...grpc.CallOption) (*Recepcion, error)
+	Solicitud_Info_DataNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error)
+	RegistrarNombre(ctx context.Context, in *Registro, opts ...grpc.CallOption) (*Recepcion, error)
 }
 
 type dataNodeClient struct {
@@ -121,25 +156,16 @@ func NewDataNodeClient(cc grpc.ClientConnInterface) DataNodeClient {
 	return &dataNodeClient{cc}
 }
 
-func (c *dataNodeClient) Solicitud_Info_DataNode_1(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error) {
+func (c *dataNodeClient) Solicitud_Info_DataNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error) {
 	out := new(Lista_Datos_DataNode)
-	err := c.cc.Invoke(ctx, "/grpc.DataNode/Solicitud_Info_DataNode_1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.DataNode/Solicitud_Info_DataNode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dataNodeClient) Solicitud_Info_DataNode_2(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Lista_Datos_DataNode, error) {
-	out := new(Lista_Datos_DataNode)
-	err := c.cc.Invoke(ctx, "/grpc.DataNode/Solicitud_Info_DataNode_2", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dataNodeClient) RegistrarNombre(ctx context.Context, in *Datos, opts ...grpc.CallOption) (*Recepcion, error) {
+func (c *dataNodeClient) RegistrarNombre(ctx context.Context, in *Registro, opts ...grpc.CallOption) (*Recepcion, error) {
 	out := new(Recepcion)
 	err := c.cc.Invoke(ctx, "/grpc.DataNode/RegistrarNombre", in, out, opts...)
 	if err != nil {
@@ -152,9 +178,8 @@ func (c *dataNodeClient) RegistrarNombre(ctx context.Context, in *Datos, opts ..
 // All implementations must embed UnimplementedDataNodeServer
 // for forward compatibility
 type DataNodeServer interface {
-	Solicitud_Info_DataNode_1(context.Context, *Id) (*Lista_Datos_DataNode, error)
-	Solicitud_Info_DataNode_2(context.Context, *Id) (*Lista_Datos_DataNode, error)
-	RegistrarNombre(context.Context, *Datos) (*Recepcion, error)
+	Solicitud_Info_DataNode(context.Context, *Id) (*Lista_Datos_DataNode, error)
+	RegistrarNombre(context.Context, *Registro) (*Recepcion, error)
 	mustEmbedUnimplementedDataNodeServer()
 }
 
@@ -162,13 +187,10 @@ type DataNodeServer interface {
 type UnimplementedDataNodeServer struct {
 }
 
-func (UnimplementedDataNodeServer) Solicitud_Info_DataNode_1(context.Context, *Id) (*Lista_Datos_DataNode, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Solicitud_Info_DataNode_1 not implemented")
+func (UnimplementedDataNodeServer) Solicitud_Info_DataNode(context.Context, *Id) (*Lista_Datos_DataNode, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Solicitud_Info_DataNode not implemented")
 }
-func (UnimplementedDataNodeServer) Solicitud_Info_DataNode_2(context.Context, *Id) (*Lista_Datos_DataNode, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Solicitud_Info_DataNode_2 not implemented")
-}
-func (UnimplementedDataNodeServer) RegistrarNombre(context.Context, *Datos) (*Recepcion, error) {
+func (UnimplementedDataNodeServer) RegistrarNombre(context.Context, *Registro) (*Recepcion, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegistrarNombre not implemented")
 }
 func (UnimplementedDataNodeServer) mustEmbedUnimplementedDataNodeServer() {}
@@ -184,44 +206,26 @@ func RegisterDataNodeServer(s grpc.ServiceRegistrar, srv DataNodeServer) {
 	s.RegisterService(&DataNode_ServiceDesc, srv)
 }
 
-func _DataNode_Solicitud_Info_DataNode_1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DataNode_Solicitud_Info_DataNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Id)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DataNodeServer).Solicitud_Info_DataNode_1(ctx, in)
+		return srv.(DataNodeServer).Solicitud_Info_DataNode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.DataNode/Solicitud_Info_DataNode_1",
+		FullMethod: "/grpc.DataNode/Solicitud_Info_DataNode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataNodeServer).Solicitud_Info_DataNode_1(ctx, req.(*Id))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DataNode_Solicitud_Info_DataNode_2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Id)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DataNodeServer).Solicitud_Info_DataNode_2(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc.DataNode/Solicitud_Info_DataNode_2",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataNodeServer).Solicitud_Info_DataNode_2(ctx, req.(*Id))
+		return srv.(DataNodeServer).Solicitud_Info_DataNode(ctx, req.(*Id))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DataNode_RegistrarNombre_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Datos)
+	in := new(Registro)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -233,7 +237,7 @@ func _DataNode_RegistrarNombre_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/grpc.DataNode/RegistrarNombre",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataNodeServer).RegistrarNombre(ctx, req.(*Datos))
+		return srv.(DataNodeServer).RegistrarNombre(ctx, req.(*Registro))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -246,102 +250,12 @@ var DataNode_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DataNodeServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Solicitud_Info_DataNode_1",
-			Handler:    _DataNode_Solicitud_Info_DataNode_1_Handler,
-		},
-		{
-			MethodName: "Solicitud_Info_DataNode_2",
-			Handler:    _DataNode_Solicitud_Info_DataNode_2_Handler,
+			MethodName: "Solicitud_Info_DataNode",
+			Handler:    _DataNode_Solicitud_Info_DataNode_Handler,
 		},
 		{
 			MethodName: "RegistrarNombre",
 			Handler:    _DataNode_RegistrarNombre_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "mess.proto",
-}
-
-// ONUClient is the client API for ONU service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ONUClient interface {
-	ConsultarNombres(ctx context.Context, in *Estado_Persona, opts ...grpc.CallOption) (*Recepcion, error)
-}
-
-type oNUClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewONUClient(cc grpc.ClientConnInterface) ONUClient {
-	return &oNUClient{cc}
-}
-
-func (c *oNUClient) ConsultarNombres(ctx context.Context, in *Estado_Persona, opts ...grpc.CallOption) (*Recepcion, error) {
-	out := new(Recepcion)
-	err := c.cc.Invoke(ctx, "/grpc.ONU/ConsultarNombres", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ONUServer is the server API for ONU service.
-// All implementations must embed UnimplementedONUServer
-// for forward compatibility
-type ONUServer interface {
-	ConsultarNombres(context.Context, *Estado_Persona) (*Recepcion, error)
-	mustEmbedUnimplementedONUServer()
-}
-
-// UnimplementedONUServer must be embedded to have forward compatible implementations.
-type UnimplementedONUServer struct {
-}
-
-func (UnimplementedONUServer) ConsultarNombres(context.Context, *Estado_Persona) (*Recepcion, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConsultarNombres not implemented")
-}
-func (UnimplementedONUServer) mustEmbedUnimplementedONUServer() {}
-
-// UnsafeONUServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ONUServer will
-// result in compilation errors.
-type UnsafeONUServer interface {
-	mustEmbedUnimplementedONUServer()
-}
-
-func RegisterONUServer(s grpc.ServiceRegistrar, srv ONUServer) {
-	s.RegisterService(&ONU_ServiceDesc, srv)
-}
-
-func _ONU_ConsultarNombres_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Estado_Persona)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ONUServer).ConsultarNombres(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc.ONU/ConsultarNombres",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ONUServer).ConsultarNombres(ctx, req.(*Estado_Persona))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// ONU_ServiceDesc is the grpc.ServiceDesc for ONU service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var ONU_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.ONU",
-	HandlerType: (*ONUServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "ConsultarNombres",
-			Handler:    _ONU_ConsultarNombres_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
