@@ -23,23 +23,28 @@ package grpc;
 
 service NameNode{
     rpc Recepcion_Info (Datos) returns (Recepcion) {}
+    rpc ConsultarNombres (Estado_Persona) returns (Lista_Datos_DataNode) {}
 }
 
 service DataNode {
-    rpc Solicitud_Info_DataNode_1 (Id) returns (Lista_Datos_DataNode) {} //PedirNombre
-    rpc Solicitud_Info_DataNode_2 (Id) returns (Lista_Datos_DataNode) {} 
-    rpc RegistrarNombre (Datos) returns (Recepcion) {}
+    rpc Solicitud_Info_DataNode (Id) returns (Lista_Datos_DataNode) {} //PedirNombre
+    rpc RegistrarNombre (Registro) returns (Recepcion) {}
 }
 
-service ONU {
-  rpc ConsultarNombres (Estado_Persona) returns (Recepcion) {}
-
-}
+//service ONU {
+  //rpc ConsultarNombres (Estado_Persona) returns (Recepcion) {}
+//}
 
 message Datos {
   string nombre = 1;
   string apellido = 2;
   string estado = 3;
+}
+
+message Registro {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
 }
 
 message Recepcion{
@@ -52,7 +57,7 @@ message Datos_DataNode {
 }
 
 message Lista_Datos_DataNode {
-  repeated Datos_DataNode lista_datos_DataNode = 1;
+  repeated Datos_DataNode datos = 1;
 }
 
 message Id{
