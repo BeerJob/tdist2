@@ -49,5 +49,8 @@ func main(){
 		}else{
 			log.Printf("%s", r.Ok)
 		}
+		if i==4{
+			time.sleep(3 * time.Second)
+		}
 	}
 }
