@@ -49,7 +49,7 @@ func main(){
 		}else{
 			log.Printf("%s", r.Ok)
 		}
-		if i==4{
+		if i>=4{
 			time.Sleep(3 * time.Second)
 		}
 	}
